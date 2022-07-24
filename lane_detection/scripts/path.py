@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 import rospy
 from sensor_msgs.msg import Image
 import cv2
@@ -9,23 +8,32 @@ import matplotlib.pylab as plt
 import numpy as np
 import math
 
-cv_image = None
+interested_region = [
+    (0,435),
+    (0,420),
+    (640,420),
+    (640,440)
+]
 
-def read_image(image):
-    bridge = CvBridge()
-    global cv_image 
-    cv_image = bridge.imgmsg_to_cv2(image, desired_encoding="passthrough")
+class image():
+    def __init__(self):
+        self.bridge = CvBridge()
+        self.cv_image = None
 
+    def read_image(self,image):
+        self.cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="passthrough")
 
-def print_image():
-    cv2.imshow('LIMO_POV', cv_image)
-    cv2.waitKey(3)
+    def print_image(self):
+        cv2.imshow('LIMO_POV', self.cv_image)
+        cv2.waitKey(3)
 
 def main():
-    print_image()
+    ss = image()
+    rospy.Subscriber('/limo/color/image_raw', Image, ss.read_image)
+    ss.print_image()
+
 
 if __name__ == '__main__':
     rospy.init_node('limo_pov_node', anonymous=True)
-    rospy.Subscriber('/limo/color/image_raw', Image, read_image)
     main()
     rospy.spin()
