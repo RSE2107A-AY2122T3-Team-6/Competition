@@ -62,7 +62,7 @@ def read_image(image):
     cv_image_copy = cv_image.copy()
 
     hsv = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-    white_mask = cv2.inRange(hsv, (89,50,0), (90,255,255))
+    white_mask = cv2.inRange(hsv, (0,0,231), (180,18,255))
     white_res = cv2.bitwise_and(cv_image,cv_image,mask=white_mask)
 
     img = cv2.cvtColor(white_res, cv2.COLOR_BGR2GRAY)
@@ -101,12 +101,12 @@ def read_image(image):
     angle_deg = (angle_rad/math.pi)*180
 
     if(angle_deg < 90):
-        spd = -0.2
+        spd = -0.1
         calculate_angular_PID()
         shutdown(spd)
         
     if(angle_deg > 90):
-        spd = 0.2
+        spd = 0.1
         calculate_angular_PID()
         shutdown(spd)
         
@@ -124,8 +124,8 @@ def read_image(image):
     
 
 def main():
-    rospy.init_node('limo_pov_node', anonymous=True)
-    rospy.Subscriber('/limo/color/image_raw', Image, read_image)
+    rospy.init_node('limo_pov_node', anonymous=False)
+    rospy.Subscriber('/camera/rgb/image_raw', Image, read_image)
     rospy.spin()
 
 
