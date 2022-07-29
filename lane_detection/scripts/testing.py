@@ -10,10 +10,10 @@ import numpy as np
 import math
 
 interested_region = [
-    (150,440),
-    (150,320),
-    (400,320),
-    (400,440)
+    (0,435),
+    (0,425),
+    (580,425),
+    (580,440)
 ]
 
 angle_deg = 0
@@ -29,20 +29,19 @@ class ttt:
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.rate = rospy.Rate(10)
         
-def shutdown(spd_z,len):
+def shutdown(spd_z):
     sss = ttt()
     cmd = Twist()
-    cmd.linear.x = 0.1
-    ang_spd = cmd.linear.x/len
+    cmd.linear.x = 0.12
     cmd.angular.z = spd_z + PIDvalue
-    print(cmd.angular.z)
 
     sss.pub.publish(cmd)
 
 def calculate_angular_PID():
-    Kp = 0.015
+    Kp = 0.0026
     Ki = 0
-    Kd = 0
+    Kd = 0.012
+
 
     if(angle_deg == 90):
         error = angle_deg
@@ -55,7 +54,7 @@ def calculate_angular_PID():
     D = error - prev_error
     PIDvalue = (Kp * P) + (Ki * I) + (Kd * D)
     prev_error = error
-    #print(error)
+    print(PIDvalue)
 
     
 def read_image(image):
@@ -78,64 +77,61 @@ def read_image(image):
     masked_img = cv2.bitwise_and(img,mask)
 
     contours, hierarchy = cv2.findContours(masked_img.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
     if len(contours) > 0:
-        blackbox = cv2.minAreaRect(contours[0])
-        (x_min, y_min), (w_min, h_min), ang = blackbox
+        c = max(contours, key=cv2.contourArea)
+        M = cv2.moments(c)
+        if M['m00'] != 0:
+            cx = int(M['m10']/M['m00'])
+            cy = int(M['m01']/M['m00'])
+
+    # if len(contours) > 0:
+    #     blackbox = cv2.minAreaRect(contours[0])
+    #     (x_min, y_min), (w_min, h_min), ang = blackbox
 
 
-        ang = int(ang)
-        box = cv2.boxPoints(blackbox)
-        box = np.int0(box)
-        cv2.drawContours(cv_image, [box], 0, (0,0,255), 3)  
-        cv2.putText(cv_image, str(ang), (10,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+    #     ang = int(ang)
+    #     box = cv2.boxPoints(blackbox)
+    #     box = np.int0(box)
+    #     cv2.drawContours(cv_image, [box], 0, (0,0,255), 3)  
+    #     cv2.putText(cv_image, str(ang), (10,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
     
-    midpt_box = ((box[0][0]+box[2][0])/2,(box[0][1]+box[2][1])/2)
-    cv_image = cv2.circle(cv_image, midpt_box, 5, (0,0,255), -1)
+    # midpt_box = ((box[0][0]+box[2][0])/2,(box[0][1]+box[2][1])/2)
+    # cv_image = cv2.circle(cv_image, midpt_box, 5, (0,0,255), -1)
     cnt_x = 640/2
     cnt_y = 480
 
     cv2.line(cv_image, (cnt_x, cnt_y), (cnt_x,0), (0,0,255), 3)
-
-    diff_y = (cnt_y-(box[0][1]+box[2][1])/2)
-    diff_x = (cnt_x-(box[0][0]+box[2][0])/2)
-    power_y = math.pow(diff_y,2)
-    power_x = math.pow(diff_x,2)
-    lenght = math.sqrt((power_x+power_y))
-
-    O = midpt_box[0] - cnt_x
-    A = midpt_box[1] - cnt_y
+    O = cx - cnt_x
+    A = cy - cnt_y
     angle_rad = -math.atan2(A,O)
     global angle_deg
     angle_deg = (angle_rad/math.pi)*180
 
     if(angle_deg < 90):
-        spd = -0.2
+        spd = -0.061
         calculate_angular_PID()
-        shutdown(spd,lenght)
+        shutdown(spd)
         
     if(angle_deg > 90):
-        spd = 0.2
+        spd = 0.061
         calculate_angular_PID()
-        shutdown(spd,lenght)
-        
-    else:
-        spd = 0
-        calculate_angular_PID()
-        shutdown(spd,lenght)
+        shutdown(spd)
         
 
-    cv2.line(cv_image, (cnt_x,cnt_y), midpt_box, (0,0,255), 3)  
-    cv2.putText(cv_image, str(angle_deg), midpt_box, cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+    cv2.line(cv_image, (cnt_x,cnt_y), (cx,cy), (0,0,255), 3)  
+    cv2.putText(cv_image, str(angle_deg), (cx,cy), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
     cv2.drawContours(cv_image, contours, 0, (0,0,255), 3)
-    #plt.imshow(cv_image)
-    #plt.show()
+    # plt.imshow(cv_image)
+    # plt.show()
     cv2.imshow('LIMO_POV', cv_image)
     cv2.waitKey(3)
+   
     
 
-if __name__ == '__main__':
-    rospy.init_node('limo_pov_node', anonymous=False)
-    # rospy.Subscriber('/camera/rgb/image_raw', Image, read_image)
+def main():
+    rospy.init_node('path', anonymous=False)
     rospy.Subscriber('/camera/rgb/image_raw', Image, read_image)
     rospy.spin()
+
+
+main()
