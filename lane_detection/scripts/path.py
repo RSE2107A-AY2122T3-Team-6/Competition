@@ -10,10 +10,10 @@ import numpy as np
 import math
 
 interested_region = [
-    (100,435),
-    (100,420),
-    (500,420),
-    (500,440)
+    (0,435),
+    (0,420),
+    (580,420),
+    (580,440)
 ]
 
 angle_deg = 0
@@ -32,15 +32,16 @@ class ttt:
 def shutdown(spd_z):
     sss = ttt()
     cmd = Twist()
-    cmd.linear.x = 0.1
+    cmd.linear.x = 0.2
     cmd.angular.z = spd_z + PIDvalue
+    print(cmd.angular.z)
 
     sss.pub.publish(cmd)
 
 def calculate_angular_PID():
-    Kp = 0.001
+    Kp = 0.006
     Ki = 0
-    Kd = 0.01
+    Kd = 0.02
 
     if(angle_deg == 90):
         error = angle_deg
@@ -53,7 +54,7 @@ def calculate_angular_PID():
     D = error - prev_error
     PIDvalue = (Kp * P) + (Ki * I) + (Kd * D)
     prev_error = error
-    print(PIDvalue)
+    
 
     
 def read_image(image):
@@ -107,12 +108,12 @@ def read_image(image):
     angle_deg = (angle_rad/math.pi)*180
 
     if(angle_deg < 90):
-        spd = -0.05
+        spd = -0.1
         calculate_angular_PID()
         shutdown(spd)
         
     if(angle_deg > 90):
-        spd = 0.05
+        spd = 0.1
         calculate_angular_PID()
         shutdown(spd)
         
