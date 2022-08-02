@@ -10,13 +10,12 @@ import numpy as np
 import math
 
 interested_region = [
-    (5,420),
-    (5,400),
-    (560,400),
-    (560,420)
+    (0,435),
+    (0,420),
+    (580,420),
+    (580,440)
 ]
 
-spd_ll = 0
 angle_deg = 0
 P = 0
 I = 0
@@ -30,10 +29,10 @@ class ttt:
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.rate = rospy.Rate(10)
         
-def shutdown(spd_z, spd_ll):
+def shutdown(spd_z):
     sss = ttt()
     cmd = Twist()
-    cmd.linear.x = spd_ll
+    cmd.linear.x = 0.1
     cmd.angular.z = spd_z + PIDvalue
     print(cmd.angular.z)
 
@@ -42,7 +41,8 @@ def shutdown(spd_z, spd_ll):
 def calculate_angular_PID():
     Kp = 0.003
     Ki = 0
-    Kd = 0.02
+    Kd = 0.01
+
     if(angle_deg == 90):
         error = angle_deg
     else:
@@ -51,11 +51,6 @@ def calculate_angular_PID():
     global P, I, D, PIDvalue, prev_error
     P = error
     I = I + error
-    if(abs(error - prev_error) > 50):
-        error = prev_error
-    if(abs(error-prev_error) > 80):
-        global spd_ll
-        spd_ll = 0.1
     D = error - prev_error
     PIDvalue = (Kp * P) + (Ki * I) + (Kd * D)
     prev_error = error
@@ -113,18 +108,14 @@ def read_image(image):
     angle_deg = (angle_rad/math.pi)*180
 
     if(angle_deg < 90):
-        global spd_ll
-        spd_ll = 0.4
-        spd_zz = -0.075
+        spd = -0.05
         calculate_angular_PID()
-        shutdown(spd_zz, spd_ll)
+        shutdown(spd)
         
     if(angle_deg > 90):
-        global spd_ll
-        spd_ll = 0.4
-        spd_zz = 0.075
+        spd = 0.05
         calculate_angular_PID()
-        shutdown(spd_zz, spd_ll)
+        shutdown(spd)
         
 
     cv2.line(cv_image, (cnt_x,cnt_y), (cx,cy), (0,0,255), 3)  
