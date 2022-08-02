@@ -8,7 +8,8 @@
 6. path_with_PID.py: new code with 0.2 speed
 ***
 ## Limo navigator
-1. T1_to_T2_straight_path.py: Too problematic. Very slow going from T1 to T3 and back. Lots of recovery behavior
+1. T1_to_T2_straight_path.py: Too problematic. Very slow going from T1 to T3 and back. Lots of recovery behavior. 
+                              Displays the coordinate reached after reaching the point
 
 
 # Final_testing for competition
