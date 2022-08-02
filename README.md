@@ -10,6 +10,8 @@
 ## Limo navigator
 1. T1_to_T2_straight_path.py: Too problematic. Very slow going from T1 to T3 and back. Lots of recovery behavior. 
                               Displays the coordinate reached after reaching the point
+2. T1_to_T2_multiple_points.py: Quite alright. Only from T1 to T2 there is slight problem. Otherwise smooth. Might
+                                Might have problems from weston to foodcourt. 
 
 
 # Final_testing for competition
