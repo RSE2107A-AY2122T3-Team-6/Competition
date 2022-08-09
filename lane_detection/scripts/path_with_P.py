@@ -1,13 +1,5 @@
 #!/usr/bin/env python
 
-
-#This Program is tested on Gazebo Simulator
-#This script uses the cv_bridge package to convert images coming on the topic
-#sensor_msgs/Image to OpenCV messages and then convert their colors from RGB to HSV
-#then apply a threshold for hues near the color yellow to obtain the binary image
-#to be able to see only the yellow line and then follow that line
-#It uses an approach called proportional and simply means
-
 import rospy, cv2, cv_bridge, numpy
 import numpy as np
 from sensor_msgs.msg import Image
@@ -31,13 +23,8 @@ class Follower:
         def image_callback(self, msg):
 
                 image = self.bridge.imgmsg_to_cv2(msg,desired_encoding='bgr8')
-                # cv2.imshow('img', image)
-                # cv2.waitKey(5)
                 hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-                #lower_yellow = numpy.array([0, 0, 0])
-                #upper_yellow = numpy.array([255, 0, 255])
                 mask = cv2.inRange(hsv, (0,0,231), (180,18,255))
-
                 h, w, d = image.shape
                 search_top = 3*h/4
                 search_bot = 3*h/4 + 20
@@ -50,8 +37,6 @@ class Follower:
                         cx = int(M['m10']/M['m00'])
                         cy = int(M['m01']/M['m00'])
                         cv2.circle(image, (cx, cy), 5, (0,0,255), -1)
-#The proportional controller is implemented in the following four lines which
-#is reposible of linear scaling of an error to drive the control output.
                         err = cx - w/2
                         self.twist.linear.x = 0.5
                         self.twist.angular.z = -float(err) / 100
