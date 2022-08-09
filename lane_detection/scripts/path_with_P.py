@@ -10,14 +10,10 @@ class Follower:
         def __init__(self):
 
                 self.bridge = cv_bridge.CvBridge()
-                # cv2.namedWindow("window", 1)
-
                 self.image_sub = rospy.Subscriber('camera/rgb/image_raw',
                         Image, self.image_callback)
-
                 self.cmd_vel_pub = rospy.Publisher('cmd_vel',
                         Twist, queue_size=1)
-
                 self.twist = Twist()
 
         def image_callback(self, msg):
@@ -31,7 +27,6 @@ class Follower:
                 mask[0:search_top, 0:w] = 0
                 mask[search_bot:h, 0:w] = 0
                 print(mask)
-
                 M = cv2.moments(mask)
                 if M['m00'] > 0:
                         cx = int(M['m10']/M['m00'])
