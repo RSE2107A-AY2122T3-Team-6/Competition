@@ -15,7 +15,6 @@ interested_region = [
     (580,420),
     (580,440)
 ]
-
 angle_deg = 0
 P = 0
 I = 0
@@ -28,7 +27,7 @@ class ttt:
     def __init__(self):
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.rate = rospy.Rate(10)
-        
+
 def shutdown(spd_z):
     sss = ttt()
     cmd = Twist()
@@ -54,8 +53,6 @@ def calculate_angular_PID():
     D = error - prev_error
     PIDvalue = (Kp * P) + (Ki * I) + (Kd * D)
     prev_error = error
-    
-
     
 def read_image(image):
     bridge = CvBridge()
@@ -83,20 +80,6 @@ def read_image(image):
         if M['m00'] != 0:
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
-
-    # if len(contours) > 0:
-    #     blackbox = cv2.minAreaRect(contours[0])
-    #     (x_min, y_min), (w_min, h_min), ang = blackbox
-
-
-    #     ang = int(ang)
-    #     box = cv2.boxPoints(blackbox)
-    #     box = np.int0(box)
-    #     cv2.drawContours(cv_image, [box], 0, (0,0,255), 3)  
-    #     cv2.putText(cv_image, str(ang), (10,40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
-    
-    # midpt_box = ((box[0][0]+box[2][0])/2,(box[0][1]+box[2][1])/2)
-    # cv_image = cv2.circle(cv_image, midpt_box, 5, (0,0,255), -1)
     cnt_x = 640/2
     cnt_y = 480
 
@@ -117,7 +100,6 @@ def read_image(image):
         calculate_angular_PID()
         shutdown(spd)
         
-
     cv2.line(cv_image, (cnt_x,cnt_y), (cx,cy), (0,0,255), 3)  
     cv2.putText(cv_image, str(angle_deg), (cx,cy), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
     cv2.drawContours(cv_image, contours, 0, (0,0,255), 3)
@@ -126,12 +108,9 @@ def read_image(image):
     cv2.imshow('LIMO_POV', cv_image)
     cv2.waitKey(3)
    
-    
-
 def main():
     rospy.init_node('path', anonymous=False)
     rospy.Subscriber('/camera/rgb/image_raw', Image, read_image)
     rospy.spin()
-
 
 main()
